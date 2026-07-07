@@ -409,7 +409,7 @@
       <sc-if value="{{ waitlistSubmitted }}" hint-placeholder-val="{{ false }}">
         <div style="position:relative; display:inline-flex; align-items:center; gap:10px; padding:17px 28px; border-radius:14px; background:rgba(22,192,142,0.16); border:1px solid rgba(22,192,142,0.4); color:#6FE3C0; font-weight:700; font-size:15px;">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6FE3C0" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg>
-          You're on the list — we'll be in touch.
+          Almost there — hit send in your email app to confirm your spot.
         </div>
       </sc-if>
       <sc-if value="{{ waitlistNotSubmitted }}" hint-placeholder-val="{{ true }}">
@@ -510,7 +510,21 @@ class Component extends DCLogic {
   onEmailChange = (e) => this.setState({ email: e.target.value });
 
   submitWaitlist = () => {
-    if (this.state.email && this.state.email.includes('@')) {
+    const email = (this.state.email || '').trim();
+    if (email && email.includes('@')) {
+      const subject = 'Zelfx waitlist request';
+      const body = [
+        'Hi Zelfx team,',
+        '',
+        "I'd like to join the Zelfx waitlist and be notified when it's available for my print shop.",
+        '',
+        'My email: ' + email,
+        '',
+        'Sent from zelfx.in'
+      ].join('\n');
+      window.location.href = 'mailto:support@zelfx.in'
+        + '?subject=' + encodeURIComponent(subject)
+        + '&body=' + encodeURIComponent(body);
       this.setState({ waitlistSubmitted: true });
     }
   };
