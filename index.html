@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zelfx — Self-Service Printing on Autopilot</title>
+<meta name="description" content="Turn your existing printers into a self-service kiosk. Customers scan, pay, and print straight from their phones — no USBs, no WhatsApp, no waiting in line.">
+<link rel="icon" type="image/png" href="zelfx-icon-mark.png">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+  <style>
+    body{margin:0;background:#0C1B16;-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility}
+    a{color:#0E9E77;text-decoration:none}
+    a:hover{color:#0A7A5C}
+    button{font-family:inherit;cursor:pointer}
+    input{font-family:inherit}
+    ::selection{background:#16C08E;color:#04140F}
+    @keyframes zx-float{0%,100%{transform:translateY(0)}50%{transform:translateY(-13px)}}
+    @keyframes zx-float-sm{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+    @keyframes zx-pulse{0%,100%{opacity:.45}50%{opacity:1}}
+    @keyframes zx-scanline{0%{top:5%}50%{top:80%}100%{top:5%}}
+    @keyframes zx-fade-up{from{opacity:0; transform:translateY(20px)}to{opacity:1; transform:translateY(0)}}
+    @keyframes zx-fade-in{from{opacity:0}to{opacity:1}}
+    @keyframes zx-drift{0%,100%{transform:translate(0,0)}50%{transform:translate(30px,-20px)}}
+    @media (max-width: 960px){
+      .zx-nav-links{display:none !important}
+      .zx-hamburger{display:flex !important}
+      .zx-hero-grid{grid-template-columns:1fr !important; gap:44px !important}
+      .zx-hero-visual{order:-1 !important; margin:0 auto !important}
+      .zx-cards-grid{grid-template-columns:1fr !important}
+      .zx-cmd-grid{grid-template-columns:1fr !important}
+      .zx-stats-row{flex-wrap:wrap !important; gap:26px !important}
+      .zx-flow-arrow{display:none !important}
+      .zx-footer-row{flex-direction:column !important; align-items:flex-start !important; gap:32px !important}
+    }
+    @media (max-width: 640px){
+      .zx-final-form{flex-direction:column !important}
+      .zx-final-form input, .zx-final-form button{width:100% !important}
+    }
+  </style>
+</helmet>
+
+<div style="position:relative; background:#F1EDE4; color:#0F1D17; font-family:'Plus Jakarta Sans',sans-serif; overflow:hidden; min-height:100vh;">
+
+  <!-- ============ NAV + HERO — dark forest band ============ -->
+  <div style="position:relative; background:radial-gradient(120% 90% at 80% 0%, #12241C 0%, #0C1B16 55%, #0A1712 100%); overflow:hidden;">
+    <!-- mesh glows -->
+    <div style="position:absolute; top:-160px; right:-120px; width:620px; height:620px; background:radial-gradient(circle, rgba(22,192,142,0.22), transparent 65%); filter:blur(10px); pointer-events:none; animation:zx-drift 14s ease-in-out infinite;"></div>
+    <div style="position:absolute; bottom:-220px; left:-160px; width:640px; height:640px; background:radial-gradient(circle, rgba(245,166,35,0.12), transparent 65%); filter:blur(10px); pointer-events:none; animation:zx-drift 18s ease-in-out infinite reverse;"></div>
+    <div style="position:absolute; inset:0; background-image:radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px); background-size:30px 30px; -webkit-mask-image:linear-gradient(180deg,black,transparent 80%); mask-image:linear-gradient(180deg,black,transparent 80%); pointer-events:none;"></div>
+
+    <!-- NAVBAR -->
+    <div style="position:sticky; top:0; z-index:50; backdrop-filter:blur(14px); background:rgba(11,24,19,0.55); border-bottom:1px solid rgba(255,255,255,0.07);">
+      <div style="max-width:1240px; margin:0 auto; padding:18px 32px; display:flex; align-items:center; justify-content:space-between;">
+        <div style="display:flex; align-items:center; gap:9px;">
+          <span style="width:38px; height:38px; border-radius:11px; background:#F1EDE4; display:flex; align-items:center; justify-content:center; box-shadow:0 0 22px rgba(22,192,142,0.35);"><img src="zelfx-icon-mark.png" alt="Zelfx" style="width:30px; height:30px; object-fit:contain;"/></span>
+          <span style="font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:22px; letter-spacing:-0.02em; color:#F5F2EA;">zelf<span style="color:#16C08E;">x</span></span>
+        </div>
+
+        <div class="zx-nav-links" style="display:flex; align-items:center; gap:38px;">
+          <a href="#how-it-works" style="font-size:14.5px; font-weight:600; color:rgba(245,242,234,0.72);" style-hover="color:#F5F2EA;">How it Works</a>
+          <a href="#benefits" style="font-size:14.5px; font-weight:600; color:rgba(245,242,234,0.72);" style-hover="color:#F5F2EA;">Benefits</a>
+          <a href="#faq" style="font-size:14.5px; font-weight:600; color:rgba(245,242,234,0.72);" style-hover="color:#F5F2EA;">FAQ</a>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:14px;">
+          <a href="#waitlist" class="zx-nav-links" style="display:flex; align-items:center; padding:11px 24px; border-radius:999px; background:linear-gradient(135deg,#16C08E,#0E9E77); font-size:14.5px; font-weight:700; color:#04140F; box-shadow:0 8px 24px rgba(22,192,142,0.35); transition:transform .25s ease, box-shadow .25s ease;" style-hover="transform:translateY(-2px); box-shadow:0 14px 32px rgba(22,192,142,0.5);">Join Waitlist</a>
+          <button class="zx-hamburger" onClick="{{ toggleMobileMenu }}" style="display:none; width:42px; height:42px; border-radius:11px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.12); align-items:center; justify-content:center; flex-direction:column; gap:4px;">
+            <span style="width:18px; height:2px; background:#F5F2EA; border-radius:2px;"></span>
+            <span style="width:18px; height:2px; background:#F5F2EA; border-radius:2px;"></span>
+          </button>
+        </div>
+      </div>
+
+      <sc-if value="{{ mobileMenuOpen }}">
+        <div style="display:flex; flex-direction:column; gap:2px; padding:8px 24px 20px; background:rgba(11,24,19,0.97); border-bottom:1px solid rgba(255,255,255,0.08);">
+          <a href="#how-it-works" onClick="{{ closeMobileMenu }}" style="padding:13px 8px; font-size:15px; font-weight:600; color:#F5F2EA; border-bottom:1px solid rgba(255,255,255,0.06);">How it Works</a>
+          <a href="#benefits" onClick="{{ closeMobileMenu }}" style="padding:13px 8px; font-size:15px; font-weight:600; color:#F5F2EA; border-bottom:1px solid rgba(255,255,255,0.06);">Benefits</a>
+          <a href="#faq" onClick="{{ closeMobileMenu }}" style="padding:13px 8px; font-size:15px; font-weight:600; color:#F5F2EA;">FAQ</a>
+          <a href="#waitlist" onClick="{{ closeMobileMenu }}" style="margin-top:12px; text-align:center; padding:13px; border-radius:999px; background:linear-gradient(135deg,#16C08E,#0E9E77); font-weight:700; color:#04140F;">Join Waitlist</a>
+        </div>
+      </sc-if>
+    </div>
+
+    <!-- HERO -->
+    <div style="position:relative; max-width:1240px; margin:0 auto; padding:80px 32px 120px;">
+      <div class="zx-hero-grid" style="display:grid; grid-template-columns:1.08fr 0.92fr; gap:60px; align-items:center;">
+
+        <div>
+          <div style="display:inline-flex; align-items:center; gap:11px; font-size:11.5px; font-weight:700; letter-spacing:0.22em; text-transform:uppercase; color:#6FE3C0; margin-bottom:30px; opacity:0; animation:zx-fade-up .7s ease .05s forwards;">
+            <span style="width:6px; height:6px; border-radius:50%; background:#16C08E; box-shadow:0 0 12px #16C08E; animation:zx-pulse 1.8s ease-in-out infinite;"></span>
+            The Future of Walk-in Printing
+          </div>
+
+          <h1 style="font-family:'Space Grotesk',sans-serif; font-size:clamp(46px,7vw,88px); line-height:0.98; letter-spacing:-0.035em; font-weight:700; margin:0 0 26px; color:#F5F2EA; opacity:0; animation:zx-fade-up .7s ease .15s forwards;">
+            Your print shop,<br/>fully <span style="font-family:'Instrument Serif',serif; font-style:italic; font-weight:400; letter-spacing:-0.01em; background:linear-gradient(115deg,#6FE3C0,#16C08E); -webkit-background-clip:text; background-clip:text; color:transparent;">automated.</span>
+          </h1>
+
+          <p style="font-size:clamp(16px,1.55vw,19px); line-height:1.62; color:rgba(245,242,234,0.66); max-width:500px; margin:0 0 38px; opacity:0; animation:zx-fade-up .7s ease .26s forwards;">
+            Turn your existing printers into a self-service kiosk. Customers scan, pay, and print straight from their phones — no USBs, no WhatsApp, no waiting in line.
+          </p>
+
+          <div style="display:flex; flex-wrap:wrap; align-items:center; gap:22px; margin-bottom:44px; opacity:0; animation:zx-fade-up .7s ease .38s forwards;">
+            <div style="position:relative;">
+              <button style="position:relative; display:flex; align-items:center; gap:11px; padding:17px 32px; border-radius:14px; border:none; background:linear-gradient(135deg,#16C08E,#0E9E77); font-size:15.5px; font-weight:700; color:#04140F; box-shadow:0 16px 40px rgba(22,192,142,0.4); transition:transform .25s ease, box-shadow .25s ease;" style-hover="transform:translateY(-3px); box-shadow:0 22px 48px rgba(22,192,142,0.55);">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#04140F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
+                Download Zelfx Desktop
+              </button>
+              <div style="position:absolute; top:-13px; right:-15px; padding:5px 12px; border-radius:999px; background:#F5A623; color:#3A2400; font-size:10px; font-weight:800; letter-spacing:0.05em; transform:rotate(7deg); box-shadow:0 8px 20px rgba(245,166,35,0.5); animation:zx-float-sm 2.6s ease-in-out infinite;">COMING SOON</div>
+            </div>
+
+            <a href="#how-it-works" style="display:flex; align-items:center; gap:9px; font-size:15.5px; font-weight:700; color:#F5F2EA; padding-bottom:4px; border-bottom:1px solid rgba(245,242,234,0.28);" style-hover="border-color:#16C08E; color:#6FE3C0;">
+              See how it works
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M19 12l-7 7-7-7"/></svg>
+            </a>
+          </div>
+
+          <div class="zx-stats-row" style="display:flex; gap:40px; padding-top:30px; border-top:1px solid rgba(245,242,234,0.12); opacity:0; animation:zx-fade-up .7s ease .5s forwards;">
+            <div><div style="font-family:'Space Grotesk',sans-serif; font-size:27px; font-weight:700; color:#F5F2EA;">&lt;60s</div><div style="font-size:12px; color:rgba(245,242,234,0.5); margin-top:3px;">Avg. print time</div></div>
+            <div style="width:1px; background:rgba(245,242,234,0.12);"></div>
+            <div><div style="font-family:'Space Grotesk',sans-serif; font-size:27px; font-weight:700; color:#F5F2EA;">₹0</div><div style="font-size:12px; color:rgba(245,242,234,0.5); margin-top:3px;">Extra hardware</div></div>
+            <div style="width:1px; background:rgba(245,242,234,0.12);"></div>
+            <div><div style="font-family:'Space Grotesk',sans-serif; font-size:27px; font-weight:700; color:#F5F2EA;">100%</div><div style="font-size:12px; color:rgba(245,242,234,0.5); margin-top:3px;">Files auto-deleted</div></div>
+          </div>
+        </div>
+
+        <!-- Hero visual: the QR poster on the shop wall -->
+        <div class="zx-hero-visual" style="position:relative; display:flex; align-items:center; justify-content:center; padding:26px 14px; opacity:0; animation:zx-fade-in 1s ease .3s forwards;">
+          <div style="position:absolute; width:380px; height:380px; border-radius:50%; background:radial-gradient(circle,rgba(22,192,142,0.28),transparent 68%); pointer-events:none;"></div>
+
+          <div style="position:relative; width:100%; max-width:326px; animation:zx-float 6s ease-in-out infinite;">
+            <div style="background:#FBFAF5; border-radius:26px; box-shadow:0 50px 100px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.06); padding:30px 26px 26px; text-align:center; transform:rotate(-2deg);">
+              <div style="display:flex; align-items:center; justify-content:center; gap:7px; margin-bottom:5px;">
+                <img src="zelfx-icon-mark.png" alt="" style="width:26px; height:26px; object-fit:contain;"/>
+                <span style="font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:19px; color:#0F1D17;">zelf<span style="color:#0E9E77;">x</span></span>
+              </div>
+              <div style="font-size:10.5px; font-weight:800; letter-spacing:0.14em; text-transform:uppercase; color:#0A7A5C; margin-bottom:20px;">Self-service printing</div>
+              <div style="font-family:'Instrument Serif',serif; font-size:34px; font-weight:400; color:#0F1D17; margin-bottom:20px; letter-spacing:-0.01em;">Scan to Print</div>
+              <div style="position:relative; width:180px; height:180px; margin:0 auto 20px; background:#F1EDE4; border-radius:16px; padding:15px; box-shadow:inset 0 0 0 1px rgba(15,29,23,0.05); overflow:hidden;">
+                <div style="width:100%; height:100%; display:grid; grid-template-columns:repeat(7,1fr); grid-template-rows:repeat(7,1fr); gap:4px;">
+                  <div style="grid-column:1/4; grid-row:1/4; background:#0F1D17; border-radius:4px;"></div>
+                  <div style="grid-column:5/8; grid-row:1/4; background:#0F1D17; border-radius:4px;"></div>
+                  <div style="grid-column:1/4; grid-row:5/8; background:#0F1D17; border-radius:4px;"></div>
+                  <div style="grid-column:5;grid-row:5;background:#0F1D17;border-radius:2px;"></div>
+                  <div style="grid-column:7;grid-row:5;background:#0E9E77;border-radius:2px;"></div>
+                  <div style="grid-column:6;grid-row:6;background:#0F1D17;border-radius:2px;"></div>
+                  <div style="grid-column:5;grid-row:7;background:#0F1D17;border-radius:2px;"></div>
+                  <div style="grid-column:7;grid-row:7;background:#0F1D17;border-radius:2px;"></div>
+                </div>
+                <div style="position:absolute; left:15px; right:15px; height:32px; background:linear-gradient(180deg,transparent,rgba(14,158,119,0.4),transparent); animation:zx-scanline 2.6s ease-in-out infinite;"></div>
+              </div>
+              <div style="display:inline-flex; align-items:center; gap:8px; font-size:13px; font-weight:600; color:rgba(15,29,23,0.6);">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#0A7A5C" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8a2 2 0 012-2h1.2l.9-1.6A1 1 0 019 4h6a1 1 0 01.9.6L16.8 6H18a2 2 0 012 2v9a2 2 0 01-2 2H6a2 2 0 01-2-2z"/><circle cx="12" cy="13" r="3.2"/></svg>
+                Point your phone camera
+              </div>
+              <div style="margin-top:6px; font-size:11.5px; color:rgba(15,29,23,0.42);">No app needed</div>
+            </div>
+
+            <div style="position:absolute; top:-16px; left:-16px; display:flex; align-items:center; gap:7px; padding:9px 13px; border-radius:12px; background:#0F1D17; box-shadow:0 16px 34px rgba(0,0,0,0.4); pointer-events:none; animation:zx-float-sm 4.6s ease-in-out infinite;">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#6FE3C0" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-6.7 7-12a7 7 0 10-14 0c0 5.3 7 12 7 12z"/><circle cx="12" cy="9" r="2.4"/></svg>
+              <span style="font-size:11.5px; font-weight:700; color:#F5F2EA;">On the shop wall</span>
+            </div>
+
+            <div style="position:absolute; bottom:-18px; right:-18px; display:flex; align-items:center; gap:10px; padding:11px 15px; border-radius:14px; background:#FBFAF5; box-shadow:0 18px 40px rgba(0,0,0,0.35); pointer-events:none; animation:zx-float-sm 4.6s ease-in-out infinite 1s;">
+              <span style="width:28px; height:28px; border-radius:50%; background:#0E9E77; display:flex; align-items:center; justify-content:center; flex:none;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg>
+              </span>
+              <div>
+                <div style="font-size:12px; font-weight:700; color:#0F1D17;">Print page opens</div>
+                <div style="font-size:10px; color:rgba(15,29,23,0.5);">right in the browser</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- curved cream transition -->
+    <div style="height:60px; background:#F1EDE4; border-radius:60px 60px 0 0; margin-top:-1px;"></div>
+  </div>
+
+  <!-- ============ HOW IT WORKS (customers) ============ -->
+  <div id="how-it-works" style="position:relative; max-width:1160px; margin:0 auto; padding:56px 32px 130px;">
+    <div style="text-align:center; opacity:{{ opacityOf.walkinTitle }}; transform:{{ transformOf.walkinTitle }}; transition:opacity .9s ease, transform .9s ease;" data-reveal-id="walkinTitle">
+      <div style="display:inline-flex; align-items:center; gap:9px; font-size:11.5px; font-weight:700; letter-spacing:0.2em; text-transform:uppercase; color:#0A7A5C; margin-bottom:18px;"><span style="width:24px; height:1.5px; background:#0A7A5C;"></span>For Customers</div>
+      <h2 style="font-family:'Space Grotesk',sans-serif; font-size:clamp(32px,4.4vw,52px); font-weight:700; letter-spacing:-0.03em; margin:0 0 18px; color:#0F1D17;">Print in three <span style="font-family:'Instrument Serif',serif; font-style:italic; font-weight:400; color:#0A7A5C;">easy</span> steps</h2>
+      <p style="font-size:17px; line-height:1.6; color:rgba(15,29,23,0.56); max-width:540px; margin:0 auto 74px;">No app to install, no account to create. Walk in, scan the poster, and print straight from your phone — usually in under a minute.</p>
+    </div>
+
+    <div style="display:flex; flex-wrap:wrap; align-items:stretch; justify-content:center; gap:18px;">
+
+      <!-- Step 1 -->
+      <div data-reveal-id="step1" style="opacity:{{ opacityOf.step1 }}; transform:{{ transformOf.step1 }}; transition:opacity .8s ease, transform .8s ease, box-shadow .35s ease, border-color .35s ease; flex:1 1 280px; max-width:336px; background:#FBFAF5; border-radius:24px; border:1px solid rgba(15,29,23,0.08); box-shadow:0 2px 10px rgba(15,29,23,0.03); padding:40px 32px; text-align:center;" style-hover="transform:translateY(-8px); box-shadow:0 30px 60px rgba(14,158,119,0.16); border-color:rgba(14,158,119,0.4);">
+        <div style="position:relative; width:92px; height:92px; margin:0 auto 26px;">
+          <div style="width:92px; height:92px; border-radius:26px; background:linear-gradient(150deg,rgba(22,192,142,0.16),rgba(14,158,119,0.08)); display:flex; align-items:center; justify-content:center;">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#0A7A5C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 14h3v3"/><path d="M17 21h4"/><path d="M21 17v4"/></svg>
+          </div>
+          <div style="position:absolute; top:-8px; right:-8px; width:30px; height:30px; border-radius:50%; background:#0F1D17; color:#F5F2EA; display:flex; align-items:center; justify-content:center; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px;">1</div>
+        </div>
+        <h3 style="font-family:'Space Grotesk',sans-serif; font-size:22px; font-weight:600; margin:0 0 12px; color:#0F1D17;">Scan the QR code</h3>
+        <p style="font-size:15px; line-height:1.6; color:rgba(15,29,23,0.56); margin:0 0 20px;">Point your phone camera at the Zelfx poster on the wall. The print page opens right away in your browser.</p>
+        <div style="display:inline-flex; align-items:center; gap:7px; padding:8px 14px; border-radius:999px; background:rgba(14,158,119,0.09); font-size:12.5px; font-weight:700; color:#0A7A5C;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#0E9E77" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg>
+          Works on any phone
+        </div>
+      </div>
+
+      <div class="zx-flow-arrow" style="display:flex; align-items:center; color:rgba(15,29,23,0.2);">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </div>
+
+      <!-- Step 2 -->
+      <div data-reveal-id="step2" style="opacity:{{ opacityOf.step2 }}; transform:{{ transformOf.step2 }}; transition:opacity .8s ease, transform .8s ease, box-shadow .35s ease, border-color .35s ease; flex:1 1 280px; max-width:336px; background:#FBFAF5; border-radius:24px; border:1px solid rgba(15,29,23,0.08); box-shadow:0 2px 10px rgba(15,29,23,0.03); padding:40px 32px; text-align:center;" style-hover="transform:translateY(-8px); box-shadow:0 30px 60px rgba(14,158,119,0.16); border-color:rgba(14,158,119,0.4);">
+        <div style="position:relative; width:92px; height:92px; margin:0 auto 26px;">
+          <div style="width:92px; height:92px; border-radius:26px; background:linear-gradient(150deg,rgba(22,192,142,0.16),rgba(14,158,119,0.08)); display:flex; align-items:center; justify-content:center;">
+            <svg width="38" height="38" viewBox="0 0 24 24" fill="none"><rect x="6" y="2" width="12" height="20" rx="3" stroke="#0A7A5C" stroke-width="1.8"/><path d="M10 5.5h4" stroke="#0A7A5C" stroke-width="1.8" stroke-linecap="round"/><text x="12" y="15.5" font-size="9" font-weight="800" fill="#0A7A5C" text-anchor="middle" font-family="'Plus Jakarta Sans',sans-serif">₹</text></svg>
+          </div>
+          <div style="position:absolute; top:-8px; right:-8px; width:30px; height:30px; border-radius:50%; background:#0F1D17; color:#F5F2EA; display:flex; align-items:center; justify-content:center; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px;">2</div>
+        </div>
+        <h3 style="font-family:'Space Grotesk',sans-serif; font-size:22px; font-weight:600; margin:0 0 12px; color:#0F1D17;">Choose &amp; pay</h3>
+        <p style="font-size:15px; line-height:1.6; color:rgba(15,29,23,0.56); margin:0 0 20px;">Pick your file, color or black &amp; white, size and copies. See the price, then pay on your phone.</p>
+        <div style="display:inline-flex; align-items:center; gap:7px; padding:8px 14px; border-radius:999px; background:rgba(14,158,119,0.09); font-size:12.5px; font-weight:700; color:#0A7A5C;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#0E9E77" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg>
+          Pay by UPI or card
+        </div>
+      </div>
+
+      <div class="zx-flow-arrow" style="display:flex; align-items:center; color:rgba(15,29,23,0.2);">
+        <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </div>
+
+      <!-- Step 3 -->
+      <div data-reveal-id="step3" style="opacity:{{ opacityOf.step3 }}; transform:{{ transformOf.step3 }}; transition:opacity .8s ease, transform .8s ease, box-shadow .35s ease, border-color .35s ease; flex:1 1 280px; max-width:336px; background:#FBFAF5; border-radius:24px; border:1px solid rgba(15,29,23,0.08); box-shadow:0 2px 10px rgba(15,29,23,0.03); padding:40px 32px; text-align:center;" style-hover="transform:translateY(-8px); box-shadow:0 30px 60px rgba(14,158,119,0.16); border-color:rgba(14,158,119,0.4);">
+        <div style="position:relative; width:92px; height:92px; margin:0 auto 26px;">
+          <div style="width:92px; height:92px; border-radius:26px; background:linear-gradient(150deg,rgba(22,192,142,0.16),rgba(14,158,119,0.08)); display:flex; align-items:center; justify-content:center;">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#0A7A5C" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="3" width="12" height="6" rx="1"/><path d="M6 18H5a2 2 0 01-2-2v-4a2 2 0 012-2h14a2 2 0 012 2v4a2 2 0 01-2 2h-1"/><rect x="7" y="15" width="10" height="6" rx="1"/></svg>
+          </div>
+          <div style="position:absolute; top:-8px; right:-8px; width:30px; height:30px; border-radius:50%; background:#0F1D17; color:#F5F2EA; display:flex; align-items:center; justify-content:center; font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:14px;">3</div>
+        </div>
+        <h3 style="font-family:'Space Grotesk',sans-serif; font-size:22px; font-weight:600; margin:0 0 12px; color:#0F1D17;">Collect your prints</h3>
+        <p style="font-size:15px; line-height:1.6; color:rgba(15,29,23,0.56); margin:0 0 20px;">The printer wakes up and prints straight away. Grab your pages from the tray and go — that's it.</p>
+        <div style="display:inline-flex; align-items:center; gap:7px; padding:8px 14px; border-radius:999px; background:rgba(14,158,119,0.09); font-size:12.5px; font-weight:700; color:#0A7A5C;">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#0E9E77" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg>
+          Ready in seconds
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============ B2B BENEFITS ============ -->
+  <div id="benefits" style="position:relative; max-width:1180px; margin:0 auto; padding:20px 32px 140px;">
+    <div style="text-align:center; margin-bottom:66px;">
+      <div style="display:inline-flex; align-items:center; gap:9px; font-size:11.5px; font-weight:700; letter-spacing:0.2em; text-transform:uppercase; color:#0A7A5C; margin-bottom:18px;"><span style="width:24px; height:1.5px; background:#0A7A5C;"></span>For Shop Owners</div>
+      <h2 style="font-family:'Space Grotesk',sans-serif; font-size:clamp(32px,4.4vw,52px); font-weight:700; letter-spacing:-0.03em; margin:0 0 18px; color:#0F1D17;">Run your shop on <span style="font-family:'Instrument Serif',serif; font-style:italic; font-weight:400; color:#0A7A5C;">autopilot</span></h2>
+      <p style="font-size:17px; line-height:1.6; color:rgba(15,29,23,0.56); max-width:480px; margin:0 auto;">Set it up once. Zelfx handles pricing, hardware, security, and reporting.</p>
+    </div>
+
+    <div class="zx-cards-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:22px;">
+
+      <div data-reveal-id="card1" style="opacity:{{ opacityOf.card1 }}; transform:{{ transformOf.card1 }}; transition:opacity .8s ease, transform .8s ease, border-color .35s ease, box-shadow .35s ease; padding:38px; border-radius:22px; background:#FBFAF5; border:1px solid rgba(15,29,23,0.08); box-shadow:0 2px 12px rgba(15,29,23,0.03);" style-hover="transform:translateY(-6px); border-color:rgba(14,158,119,0.4); box-shadow:0 28px 56px rgba(14,158,119,0.14);">
+        <div style="width:56px; height:56px; border-radius:16px; background:linear-gradient(150deg,#16C08E,#0E9E77); display:flex; align-items:center; justify-content:center; margin-bottom:24px; box-shadow:0 10px 24px rgba(14,158,119,0.3);">
+          <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.59 13.41L13.42 20.58a2 2 0 01-2.83 0L3 13V3h10z"/><circle cx="7.5" cy="7.5" r="1.5" fill="#fff" stroke="none"/></svg>
+        </div>
+        <h3 style="font-family:'Space Grotesk',sans-serif; font-size:21px; font-weight:600; margin:0 0 12px; color:#0F1D17;">You set the prices</h3>
+        <p style="font-size:15px; line-height:1.65; color:rgba(15,29,23,0.56); margin:0;">Charge ₹5 for B&amp;W and ₹20 for Color. Add premiums for glossy paper. The app automatically reads the customer's document and charges exactly what it's worth.</p>
+      </div>
+
+      <div data-reveal-id="card2" style="opacity:{{ opacityOf.card2 }}; transform:{{ transformOf.card2 }}; transition:opacity .8s ease, transform .8s ease, border-color .35s ease, box-shadow .35s ease; padding:38px; border-radius:22px; background:#FBFAF5; border:1px solid rgba(15,29,23,0.08); box-shadow:0 2px 12px rgba(15,29,23,0.03);" style-hover="transform:translateY(-6px); border-color:rgba(14,158,119,0.4); box-shadow:0 28px 56px rgba(14,158,119,0.14);">
+        <div style="width:56px; height:56px; border-radius:16px; background:linear-gradient(150deg,#16C08E,#0E9E77); display:flex; align-items:center; justify-content:center; margin-bottom:24px; box-shadow:0 10px 24px rgba(14,158,119,0.3);">
+          <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="3" width="12" height="6" rx="1"/><rect x="4" y="9" width="16" height="8" rx="1.5"/><rect x="8" y="17" width="8" height="4" rx="1"/><circle cx="16.5" cy="12.5" r="0.8" fill="#fff" stroke="none"/></svg>
+        </div>
+        <h3 style="font-family:'Space Grotesk',sans-serif; font-size:21px; font-weight:600; margin:0 0 12px; color:#0F1D17;">Works with your printers</h3>
+        <p style="font-size:15px; line-height:1.65; color:rgba(15,29,23,0.56); margin:0;">If it connects to your Windows or Mac computer, Zelfx can use it. Inkjet, Laser, A4, or A3—we support the hardware you already own.</p>
+      </div>
+
+      <div data-reveal-id="card3" style="opacity:{{ opacityOf.card3 }}; transform:{{ transformOf.card3 }}; transition:opacity .8s ease, transform .8s ease, border-color .35s ease, box-shadow .35s ease; padding:38px; border-radius:22px; background:#FBFAF5; border:1px solid rgba(15,29,23,0.08); box-shadow:0 2px 12px rgba(15,29,23,0.03);" style-hover="transform:translateY(-6px); border-color:rgba(14,158,119,0.4); box-shadow:0 28px 56px rgba(14,158,119,0.14);">
+        <div style="width:56px; height:56px; border-radius:16px; background:linear-gradient(150deg,#16C08E,#0E9E77); display:flex; align-items:center; justify-content:center; margin-bottom:24px; box-shadow:0 10px 24px rgba(14,158,119,0.3);">
+          <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6z"/><path d="M9.5 12l1.8 1.8L14.5 10"/></svg>
+        </div>
+        <h3 style="font-family:'Space Grotesk',sans-serif; font-size:21px; font-weight:600; margin:0 0 12px; color:#0F1D17;">Total privacy guarantee</h3>
+        <p style="font-size:15px; line-height:1.65; color:rgba(15,29,23,0.56); margin:0;">Customer files travel securely from their phone to your printer, and are instantly deleted the second they finish printing. Say goodbye to cluttered shop computers filled with strangers' personal IDs.</p>
+      </div>
+
+      <div data-reveal-id="card4" style="opacity:{{ opacityOf.card4 }}; transform:{{ transformOf.card4 }}; transition:opacity .8s ease, transform .8s ease, border-color .35s ease, box-shadow .35s ease; padding:38px; border-radius:22px; background:#FBFAF5; border:1px solid rgba(15,29,23,0.08); box-shadow:0 2px 12px rgba(15,29,23,0.03);" style-hover="transform:translateY(-6px); border-color:rgba(14,158,119,0.4); box-shadow:0 28px 56px rgba(14,158,119,0.14);">
+        <div style="width:56px; height:56px; border-radius:16px; background:linear-gradient(150deg,#16C08E,#0E9E77); display:flex; align-items:center; justify-content:center; margin-bottom:24px; box-shadow:0 10px 24px rgba(14,158,119,0.3);">
+          <svg width="25" height="25" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10"/><path d="M11 20V4"/><path d="M18 20v-7"/><path d="M2 20h20"/></svg>
+        </div>
+        <h3 style="font-family:'Space Grotesk',sans-serif; font-size:21px; font-weight:600; margin:0 0 12px; color:#0F1D17;">Track every penny</h3>
+        <p style="font-size:15px; line-height:1.65; color:rgba(15,29,23,0.56); margin:0;">Our Desktop App acts as your command center. View a beautiful daily dashboard of every print job, total revenue, and export reports for your accounting.</p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============ COMMAND CENTER (dark) ============ -->
+  <div data-reveal-id="command" style="opacity:{{ opacityOf.command }}; transform:{{ transformOf.command }}; transition:opacity .9s ease, transform .9s ease; position:relative; background:radial-gradient(120% 100% at 50% 0%, #12241C, #0C1B16 60%); padding:120px 32px; border-radius:60px 60px 0 0; overflow:hidden;">
+    <div style="position:absolute; top:-120px; left:50%; transform:translateX(-50%); width:600px; height:400px; background:radial-gradient(circle,rgba(22,192,142,0.16),transparent 65%); pointer-events:none;"></div>
+    <div style="max-width:1180px; margin:0 auto; text-align:center; position:relative;">
+      <div style="display:inline-flex; align-items:center; gap:9px; font-size:11.5px; font-weight:700; letter-spacing:0.2em; text-transform:uppercase; color:#6FE3C0; margin-bottom:18px;"><span style="width:24px; height:1.5px; background:#6FE3C0;"></span>The Desktop App</div>
+      <h2 style="font-family:'Space Grotesk',sans-serif; font-size:clamp(32px,4.6vw,54px); font-weight:700; letter-spacing:-0.03em; margin:0 0 20px; color:#F5F2EA;">Meet your new <span style="font-family:'Instrument Serif',serif; font-style:italic; font-weight:400; color:#6FE3C0;">manager</span></h2>
+      <p style="font-size:17px; line-height:1.65; color:rgba(245,242,234,0.62); max-width:600px; margin:0 auto 60px;">Install the Zelfx app, configure your printers, and leave it running. It automatically balances the queue, pushing jobs to the fastest available printer so your shop never slows down.</p>
+
+      <div style="max-width:920px; margin:0 auto; border-radius:20px; background:#0F1D17; border:1px solid rgba(255,255,255,0.1); box-shadow:0 50px 120px rgba(0,0,0,0.5); overflow:hidden; text-align:left;">
+        <div style="display:flex; align-items:center; gap:8px; padding:15px 20px; background:#14261D; border-bottom:1px solid rgba(255,255,255,0.07);">
+          <span style="width:11px; height:11px; border-radius:50%; background:#FF5F57;"></span>
+          <span style="width:11px; height:11px; border-radius:50%; background:#FEBC2E;"></span>
+          <span style="width:11px; height:11px; border-radius:50%; background:#28C840;"></span>
+          <span style="margin-left:12px; font-size:12.5px; color:rgba(245,242,234,0.45); font-weight:600;">Zelfx Desktop — Dashboard</span>
+        </div>
+        <div class="zx-cmd-grid" style="display:grid; grid-template-columns:1.2fr 1fr; gap:1px; background:rgba(255,255,255,0.06);">
+          <div style="background:#0F1D17; padding:26px;">
+            <div style="font-size:12px; font-weight:700; letter-spacing:0.06em; color:rgba(245,242,234,0.4); text-transform:uppercase; margin-bottom:16px;">Print Queue</div>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+              <div style="display:flex; align-items:center; justify-content:space-between; padding:15px 16px; border-radius:13px; background:rgba(22,192,142,0.14); border:1px solid rgba(22,192,142,0.35);">
+                <div><div style="font-size:14px; font-weight:600; color:#F5F2EA;">Invoice_final.pdf</div><div style="font-size:12px; color:rgba(245,242,234,0.45);">Front Desk Laser</div></div>
+                <span style="font-size:11.5px; font-weight:700; color:#6FE3C0; padding:5px 11px; border-radius:999px; background:rgba(22,192,142,0.2);">Printing</span>
+              </div>
+              <div style="display:flex; align-items:center; justify-content:space-between; padding:15px 16px; border-radius:13px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.07);">
+                <div><div style="font-size:14px; font-weight:600; color:#F5F2EA;">Resume_v2.docx</div><div style="font-size:12px; color:rgba(245,242,234,0.45);">Color Inkjet</div></div>
+                <span style="font-size:11.5px; font-weight:700; color:rgba(245,242,234,0.55); padding:5px 11px; border-radius:999px; background:rgba(255,255,255,0.08);">Queued</span>
+              </div>
+              <div style="display:flex; align-items:center; justify-content:space-between; padding:15px 16px; border-radius:13px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.07);">
+                <div><div style="font-size:14px; font-weight:600; color:#F5F2EA;">ID_photo.jpg</div><div style="font-size:12px; color:rgba(245,242,234,0.45);">Color Inkjet</div></div>
+                <span style="font-size:11.5px; font-weight:700; color:rgba(245,242,234,0.55); padding:5px 11px; border-radius:999px; background:rgba(255,255,255,0.08);">Queued</span>
+              </div>
+            </div>
+          </div>
+          <div style="background:#0F1D17; padding:26px; display:flex; flex-direction:column; gap:22px;">
+            <div>
+              <div style="font-size:12px; font-weight:700; letter-spacing:0.06em; color:rgba(245,242,234,0.4); text-transform:uppercase; margin-bottom:12px;">Printers</div>
+              <div style="display:flex; align-items:center; gap:10px; margin-bottom:11px;"><span style="width:8px; height:8px; border-radius:50%; background:#16C08E; box-shadow:0 0 8px #16C08E; animation:zx-pulse 1.6s ease-in-out infinite;"></span><span style="font-size:13.5px; color:#F5F2EA;">Front Desk Laser — Printing</span></div>
+              <div style="display:flex; align-items:center; gap:10px;"><span style="width:8px; height:8px; border-radius:50%; background:rgba(245,242,234,0.3);"></span><span style="font-size:13.5px; color:rgba(245,242,234,0.55);">Color Inkjet — Idle</span></div>
+            </div>
+            <div style="padding-top:18px; border-top:1px solid rgba(255,255,255,0.08);">
+              <div style="font-size:12px; font-weight:700; letter-spacing:0.06em; color:rgba(245,242,234,0.4); text-transform:uppercase; margin-bottom:8px;">Today's Revenue</div>
+              <div style="font-family:'Space Grotesk',sans-serif; font-size:34px; font-weight:700; color:#6FE3C0;">₹4,280</div>
+              <div style="font-size:12.5px; color:rgba(245,242,234,0.4); margin-top:4px;">128 jobs completed</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============ FAQ ============ -->
+  <div id="faq" style="position:relative; max-width:760px; margin:0 auto; padding:130px 32px;">
+    <div style="text-align:center; margin-bottom:56px;">
+      <div style="display:inline-flex; align-items:center; gap:9px; font-size:11.5px; font-weight:700; letter-spacing:0.2em; text-transform:uppercase; color:#0A7A5C; margin-bottom:18px;"><span style="width:24px; height:1.5px; background:#0A7A5C;"></span>Questions</div>
+      <h2 style="font-family:'Space Grotesk',sans-serif; font-size:clamp(30px,4vw,46px); font-weight:700; letter-spacing:-0.03em; margin:0; color:#0F1D17;">Frequently asked</h2>
+    </div>
+
+    <div style="display:flex; flex-direction:column; gap:14px;">
+
+      <div style="border-radius:18px; background:#FBFAF5; border:1px solid rgba(15,29,23,0.08); box-shadow:0 2px 12px rgba(15,29,23,0.03); overflow:hidden;">
+        <button onClick="{{ toggleFaq1 }}" style="width:100%; display:flex; align-items:center; justify-content:space-between; gap:16px; padding:24px 26px; background:none; border:none; text-align:left; color:#0F1D17; font-size:16.5px; font-weight:600;">
+          Do my customers need to download an app?
+          <span style="flex:none; width:30px; height:30px; border-radius:50%; background:rgba(14,158,119,0.1); display:flex; align-items:center; justify-content:center; transform:{{ faq1RotateStyle }}; transition:transform .3s ease;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0A7A5C" stroke-width="2.6" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+          </span>
+        </button>
+        <div style="max-height:{{ faq1MaxHeight }}; opacity:{{ faq1Opacity }}; overflow:hidden; transition:max-height .35s ease, opacity .3s ease;">
+          <p style="margin:0; padding:0 26px 24px; font-size:15px; line-height:1.65; color:rgba(15,29,23,0.58);">Absolutely not. They just scan the QR code using their standard phone camera, and the interface opens instantly in their mobile web browser.</p>
+        </div>
+      </div>
+
+      <div style="border-radius:18px; background:#FBFAF5; border:1px solid rgba(15,29,23,0.08); box-shadow:0 2px 12px rgba(15,29,23,0.03); overflow:hidden;">
+        <button onClick="{{ toggleFaq2 }}" style="width:100%; display:flex; align-items:center; justify-content:space-between; gap:16px; padding:24px 26px; background:none; border:none; text-align:left; color:#0F1D17; font-size:16.5px; font-weight:600;">
+          What if a printer runs out of paper?
+          <span style="flex:none; width:30px; height:30px; border-radius:50%; background:rgba(14,158,119,0.1); display:flex; align-items:center; justify-content:center; transform:{{ faq2RotateStyle }}; transition:transform .3s ease;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0A7A5C" stroke-width="2.6" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+          </span>
+        </button>
+        <div style="max-height:{{ faq2MaxHeight }}; opacity:{{ faq2Opacity }}; overflow:hidden; transition:max-height .35s ease, opacity .3s ease;">
+          <p style="margin:0; padding:0 26px 24px; font-size:15px; line-height:1.65; color:rgba(15,29,23,0.58);">The Zelfx desktop app detects hardware issues instantly. It will automatically pause the queue or route incoming jobs to your other working printers until you load more paper.</p>
+        </div>
+      </div>
+
+      <div style="border-radius:18px; background:#FBFAF5; border:1px solid rgba(15,29,23,0.08); box-shadow:0 2px 12px rgba(15,29,23,0.03); overflow:hidden;">
+        <button onClick="{{ toggleFaq3 }}" style="width:100%; display:flex; align-items:center; justify-content:space-between; gap:16px; padding:24px 26px; background:none; border:none; text-align:left; color:#0F1D17; font-size:16.5px; font-weight:600;">
+          Is it safe to print sensitive documents?
+          <span style="flex:none; width:30px; height:30px; border-radius:50%; background:rgba(14,158,119,0.1); display:flex; align-items:center; justify-content:center; transform:{{ faq3RotateStyle }}; transition:transform .3s ease;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0A7A5C" stroke-width="2.6" stroke-linecap="round"><path d="M6 9l6 6 6-6"/></svg>
+          </span>
+        </button>
+        <div style="max-height:{{ faq3MaxHeight }}; opacity:{{ faq3Opacity }}; overflow:hidden; transition:max-height .35s ease, opacity .3s ease;">
+          <p style="margin:0; padding:0 26px 24px; font-size:15px; line-height:1.65; color:rgba(15,29,23,0.58);">Yes. Zelfx uses a Zero-Trust secure connection. Files never sit on a public cloud server, and they are permanently wiped from your local computer the moment they are printed.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <p style="text-align:center; margin:42px 0 0; font-size:14.5px; color:rgba(15,29,23,0.5);">Still have questions? <a href="mailto:support@zelfx.in" style="font-weight:700; color:#0A7A5C;">support@zelfx.in</a></p>
+  </div>
+
+  <!-- ============ FINAL CTA ============ -->
+  <div id="waitlist" data-reveal-id="finalCta" style="opacity:{{ opacityOf.finalCta }}; transform:{{ transformOf.finalCta }}; transition:opacity .9s ease, transform .9s ease; position:relative; max-width:1000px; margin:0 auto 110px; padding:0 32px;">
+    <div style="position:relative; border-radius:32px; padding:76px 48px; text-align:center; background:radial-gradient(120% 120% at 50% 0%, #14261D, #0C1B16); box-shadow:0 40px 90px rgba(12,27,22,0.35); overflow:hidden;">
+      <div style="position:absolute; top:-120px; left:50%; transform:translateX(-50%); width:460px; height:460px; background:radial-gradient(circle,rgba(22,192,142,0.28),transparent 68%); pointer-events:none;"></div>
+      <div style="position:absolute; inset:0; background-image:radial-gradient(rgba(255,255,255,0.05) 1px, transparent 1px); background-size:28px 28px; opacity:0.5; pointer-events:none;"></div>
+      <h2 style="position:relative; font-family:'Space Grotesk',sans-serif; font-size:clamp(30px,4.4vw,50px); font-weight:700; letter-spacing:-0.03em; margin:0 0 18px; color:#F5F2EA;">Ready to eliminate <span style="font-family:'Instrument Serif',serif; font-style:italic; font-weight:400; color:#6FE3C0;">the line?</span></h2>
+      <p style="position:relative; font-size:16.5px; line-height:1.6; color:rgba(245,242,234,0.62); max-width:480px; margin:0 auto 38px;">Zelfx is currently rolling out to select print shops. Join the waitlist to be the first to automate your business.</p>
+
+      <sc-if value="{{ waitlistSubmitted }}" hint-placeholder-val="{{ false }}">
+        <div style="position:relative; display:inline-flex; align-items:center; gap:10px; padding:17px 28px; border-radius:14px; background:rgba(22,192,142,0.16); border:1px solid rgba(22,192,142,0.4); color:#6FE3C0; font-weight:700; font-size:15px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#6FE3C0" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12l5 5L20 6"/></svg>
+          You're on the list — we'll be in touch.
+        </div>
+      </sc-if>
+      <sc-if value="{{ waitlistNotSubmitted }}" hint-placeholder-val="{{ true }}">
+        <div class="zx-final-form" style="position:relative; display:flex; gap:10px; max-width:460px; margin:0 auto;">
+          <input type="email" value="{{ email }}" onInput="{{ onEmailChange }}" placeholder="you@printshop.com" style="flex:1; padding:16px 18px; border-radius:13px; border:1px solid rgba(255,255,255,0.16); background:rgba(255,255,255,0.06); color:#F5F2EA; font-size:15px; outline:none;"/>
+          <button onClick="{{ submitWaitlist }}" style="padding:16px 28px; border-radius:13px; border:none; background:linear-gradient(135deg,#16C08E,#0E9E77); color:#04140F; font-weight:700; font-size:15px; box-shadow:0 12px 30px rgba(22,192,142,0.4); transition:transform .25s ease;" style-hover="transform:translateY(-2px);">Join Waitlist</button>
+        </div>
+      </sc-if>
+      <p style="position:relative; font-size:12.5px; color:rgba(245,242,234,0.42); margin:18px 0 0;">No spam. Unsubscribe anytime.</p>
+    </div>
+  </div>
+
+  <!-- ============ FOOTER ============ -->
+  <div style="position:relative; background:#0C1B16; padding:56px 32px 44px;">
+    <div class="zx-footer-row" style="max-width:1240px; margin:0 auto; display:flex; align-items:center; justify-content:space-between; gap:20px;">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <span style="width:32px; height:32px; border-radius:9px; background:#F1EDE4; display:flex; align-items:center; justify-content:center;"><img src="zelfx-icon-mark.png" alt="Zelfx" style="width:26px; height:26px; object-fit:contain;"/></span>
+        <div>
+          <div style="font-family:'Space Grotesk',sans-serif; font-weight:700; font-size:16px; color:#F5F2EA;">zelf<span style="color:#16C08E;">x</span></div>
+          <div style="font-size:12px; color:rgba(245,242,234,0.4);">© 2026 Zelfx. All rights reserved.</div>
+        </div>
+      </div>
+      <div style="display:flex; align-items:center; gap:30px; font-size:13.5px; color:rgba(245,242,234,0.55); flex-wrap:wrap;">
+        <a href="#" style="color:rgba(245,242,234,0.55); transition:color .2s ease;" style-hover="color:#F5F2EA;">Privacy Policy</a>
+        <a href="#" style="color:rgba(245,242,234,0.55); transition:color .2s ease;" style-hover="color:#F5F2EA;">Terms of Service</a>
+        <a href="mailto:support@zelfx.in" style="color:rgba(245,242,234,0.55); transition:color .2s ease;" style-hover="color:#F5F2EA;">support@zelfx.in</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- film grain overlay -->
+  <div style="position:fixed; inset:0; z-index:100; pointer-events:none; opacity:0.05; mix-blend-mode:overlay; background-image:url(&quot;data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E&quot;); background-size:180px;"></div>
+
+</div>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  state = {
+    mobileMenuOpen: false,
+    revealed: {},
+    openFaq: null,
+    email: '',
+    waitlistSubmitted: false
+  };
+
+  componentDidMount() {
+    const ids = ['walkinTitle','step1','step2','step3','card1','card2','card3','card4','command','finalCta'];
+    this._io = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          const id = entry.target.getAttribute('data-reveal-id');
+          if (id) {
+            this.setState((s) => (s.revealed[id] ? null : { revealed: { ...s.revealed, [id]: true } }));
+            this._io.unobserve(entry.target);
+          }
+        }
+      });
+    }, { threshold: 0.12, rootMargin: '0px 0px -80px 0px' });
+
+    const vh = window.innerHeight || document.documentElement.clientHeight;
+    ids.forEach((id) => {
+      const els = document.querySelectorAll(`[data-reveal-id="${id}"]`);
+      els.forEach((el) => {
+        const rect = el.getBoundingClientRect();
+        if (rect.top < vh && rect.bottom > 0) {
+          this.setState((s) => (s.revealed[id] ? null : { revealed: { ...s.revealed, [id]: true } }));
+        } else {
+          this._io.observe(el);
+        }
+      });
+    });
+
+    this._fallbackTimer = setTimeout(() => {
+      this.setState((s) => {
+        const next = { ...s.revealed };
+        let changed = false;
+        ids.forEach((id) => {
+          if (!next[id]) { next[id] = true; changed = true; }
+        });
+        return changed ? { revealed: next } : null;
+      });
+    }, 2500);
+  }
+
+  componentWillUnmount() {
+    if (this._io) this._io.disconnect();
+    if (this._fallbackTimer) clearTimeout(this._fallbackTimer);
+  }
+
+  toggleMobileMenu = () => this.setState((s) => ({ mobileMenuOpen: !s.mobileMenuOpen }));
+  closeMobileMenu = () => this.setState({ mobileMenuOpen: false });
+
+  toggleFaqIndex(i) {
+    this.setState((s) => ({ openFaq: s.openFaq === i ? null : i }));
+  }
+
+  onEmailChange = (e) => this.setState({ email: e.target.value });
+
+  submitWaitlist = () => {
+    if (this.state.email && this.state.email.includes('@')) {
+      this.setState({ waitlistSubmitted: true });
+    }
+  };
+
+  renderVals() {
+    const revealed = this.state.revealed;
+    const ids = ['walkinTitle','step1','step2','step3','card1','card2','card3','card4','command','finalCta'];
+    const opacityOf = {};
+    const transformOf = {};
+    ids.forEach((id) => {
+      const on = !!revealed[id];
+      opacityOf[id] = on ? 1 : 0;
+      transformOf[id] = on ? 'translateY(0)' : 'translateY(30px)';
+    });
+
+    const openFaq = this.state.openFaq;
+
+    return {
+      mobileMenuOpen: this.state.mobileMenuOpen,
+      toggleMobileMenu: this.toggleMobileMenu,
+      closeMobileMenu: this.closeMobileMenu,
+      opacityOf,
+      transformOf,
+      toggleFaq1: () => this.toggleFaqIndex(1),
+      toggleFaq2: () => this.toggleFaqIndex(2),
+      toggleFaq3: () => this.toggleFaqIndex(3),
+      faq1MaxHeight: openFaq === 1 ? '220px' : '0px',
+      faq1Opacity: openFaq === 1 ? 1 : 0,
+      faq1RotateStyle: openFaq === 1 ? 'rotate(180deg)' : 'rotate(0deg)',
+      faq2MaxHeight: openFaq === 2 ? '220px' : '0px',
+      faq2Opacity: openFaq === 2 ? 1 : 0,
+      faq2RotateStyle: openFaq === 2 ? 'rotate(180deg)' : 'rotate(0deg)',
+      faq3MaxHeight: openFaq === 3 ? '220px' : '0px',
+      faq3Opacity: openFaq === 3 ? 1 : 0,
+      faq3RotateStyle: openFaq === 3 ? 'rotate(180deg)' : 'rotate(0deg)',
+      email: this.state.email,
+      onEmailChange: this.onEmailChange,
+      submitWaitlist: this.submitWaitlist,
+      waitlistSubmitted: this.state.waitlistSubmitted,
+      waitlistNotSubmitted: !this.state.waitlistSubmitted
+    };
+  }
+}
+
+</script>
+</body>
+</html>
