@@ -353,15 +353,12 @@
       <div style="display:inline-flex; align-items:center; gap:9px; font-size:11.5px; font-weight:700; letter-spacing:0.2em; text-transform:uppercase; color:#6FE3C0; margin-bottom:16px;"><span style="width:24px; height:1.5px; background:#6FE3C0;"></span>Get the app</div>
       <h2 style="font-size:clamp(26px,3vw,36px); color:#F5F2EA; margin:0 0 12px; letter-spacing:-0.02em;">Download Zelfx Desktop</h2>
       <p style="font-size:16px; line-height:1.6; color:rgba(245,242,234,0.6); max-width:520px; margin:0 auto 30px;">Install once on the shop computer and leave it running — it keeps itself up to date automatically.</p>
-      <a id="zx-dl-primary" href="https://github.com/sreesankarp/Zelfx-web/releases/latest" style="display:inline-flex; align-items:center; gap:11px; padding:17px 34px; border-radius:14px; background:linear-gradient(135deg,#16C08E,#0E9E77); font-size:16px; font-weight:700; color:#04140F; text-decoration:none; box-shadow:0 16px 40px rgba(22,192,142,0.4); margin-bottom:24px;">
+      <a id="zx-dl-primary" href="https://github.com/sreesankarp/Zelfx-web/releases/latest" style="display:inline-flex; align-items:center; gap:11px; padding:17px 34px; border-radius:14px; background:linear-gradient(135deg,#16C08E,#0E9E77); font-size:16px; font-weight:700; color:#04140F; text-decoration:none; box-shadow:0 16px 40px rgba(22,192,142,0.4); margin-bottom:14px;">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#04140F" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7 10l5 5 5-5"/><path d="M5 21h14"/></svg>
-        <span id="zx-dl-primary-label">Download the latest version</span>
+        <span id="zx-dl-primary-label">Download for Windows</span>
       </a>
-      <div style="display:flex; flex-wrap:wrap; gap:12px; justify-content:center;">
-        <a id="dl-win" href="https://github.com/sreesankarp/Zelfx-web/releases/latest" style="display:inline-flex; align-items:center; gap:8px; padding:11px 20px; border-radius:11px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.14); font-size:14px; font-weight:650; color:#F5F2EA; text-decoration:none;">🪟 Windows</a>
-        <a id="dl-mac" href="https://github.com/sreesankarp/Zelfx-web/releases/latest" style="display:inline-flex; align-items:center; gap:8px; padding:11px 20px; border-radius:11px; background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.14); font-size:14px; font-weight:650; color:#F5F2EA; text-decoration:none;"> macOS</a>
-      </div>
-      <div id="zx-dl-version" style="margin-top:20px; font-size:12.5px; color:rgba(245,242,234,0.4);"></div>
+      <div style="font-size:12.5px; color:rgba(245,242,234,0.45);">Windows 10 / 11</div>
+      <div id="zx-dl-version" style="margin-top:14px; font-size:12.5px; color:rgba(245,242,234,0.4);"></div>
     </div>
   </div>
 
@@ -587,55 +584,26 @@ class Component extends DCLogic {
 }
 
 </script>
-<!-- Download links: always resolve to the newest Zelfx-web release, and default to the visitor's OS. -->
+<!-- Download button: always resolves to the newest Windows installer in the Zelfx-web releases. -->
 <script>
 (function () {
   var REPO = 'sreesankarp/Zelfx-web';
   var RELEASES = 'https://github.com/' + REPO + '/releases/latest';
-  function detectOS() {
-    var p = ((navigator.userAgentData && navigator.userAgentData.platform) || navigator.platform || navigator.userAgent || '').toLowerCase();
-    if (p.indexOf('win') >= 0) return 'win';
-    if (p.indexOf('mac') >= 0 || p.indexOf('iphone') >= 0 || p.indexOf('ipad') >= 0) return 'mac';
-    if (p.indexOf('linux') >= 0 || p.indexOf('android') >= 0) return 'linux';
-    return null;
-  }
-  function setLink(id, url) {
-    var el = document.getElementById(id);
-    if (!el) return;
-    if (url) { el.href = url; el.style.display = ''; } else { el.style.display = 'none'; }
+  function apply(url, tag) {
+    var primary = document.getElementById('zx-dl-primary');
+    if (primary) primary.href = url;
+    var hero = document.getElementById('zx-hero-download');
+    if (hero) hero.onclick = function () { window.location.href = url; };
+    var ver = document.getElementById('zx-dl-version');
+    if (ver && tag) ver.textContent = 'Latest: ' + tag.replace('desktop-v', 'v');
   }
   fetch('https://api.github.com/repos/' + REPO + '/releases/latest', { headers: { Accept: 'application/vnd.github+json' } })
     .then(function (r) { return r.ok ? r.json() : Promise.reject(); })
     .then(function (rel) {
-      var urls = { win: null, mac: null, linux: null };
-      (rel.assets || []).forEach(function (a) {
-        var e = (a.name.split('.').pop() || '').toLowerCase();
-        if (e === 'exe') urls.win = a.browser_download_url;
-        else if (e === 'dmg') urls.mac = a.browser_download_url;
-        else if (e === 'appimage') urls.linux = a.browser_download_url;
-      });
-      setLink('dl-win', urls.win);
-      setLink('dl-mac', urls.mac);
-      setLink('dl-linux', urls.linux);
-      var os = detectOS();
-      var labels = { win: 'Download for Windows', mac: 'Download for macOS', linux: 'Download for Linux' };
-      var primary = document.getElementById('zx-dl-primary');
-      var label = document.getElementById('zx-dl-primary-label');
-      if (primary) primary.href = (os && urls[os]) ? urls[os] : RELEASES;
-      if (label && os && urls[os]) label.textContent = labels[os];
-      var ver = document.getElementById('zx-dl-version');
-      if (ver && rel.tag_name) ver.textContent = 'Latest: ' + rel.tag_name.replace('desktop-v', 'v');
-      var hero = document.getElementById('zx-hero-download');
-      if (hero) hero.onclick = function () { window.location.href = (os && urls[os]) ? urls[os] : RELEASES; };
+      var exe = (rel.assets || []).filter(function (a) { return /\.exe$/i.test(a.name); })[0];
+      apply(exe ? exe.browser_download_url : RELEASES, rel.tag_name);
     })
-    .catch(function () {
-      // GitHub API unavailable — send everyone to the releases page as a safe fallback.
-      ['zx-dl-primary', 'dl-win', 'dl-mac', 'dl-linux'].forEach(function (id) {
-        var el = document.getElementById(id); if (el) el.href = RELEASES;
-      });
-      var hero = document.getElementById('zx-hero-download');
-      if (hero) hero.onclick = function () { window.location.href = RELEASES; };
-    });
+    .catch(function () { apply(RELEASES); }); // API unavailable → releases page fallback
 })();
 </script>
 </body>
